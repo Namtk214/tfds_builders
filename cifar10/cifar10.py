@@ -54,6 +54,7 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
             "id": tfds.features.Text(),
             "image": tfds.features.Image(shape=_CIFAR_IMAGE_SHAPE),
             # "label": tfds.features.ClassLabel(num_classes=10),
+            "coarse_label": tfds.features.ClassLabel(num_classes=20),
             "label": tfds.features.ClassLabel(num_classes=100),
         }),
         supervised_keys=("image", "label"),
@@ -72,7 +73,7 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
         # prefix="cifar-10-batches-bin/",
         prefix="cifar-100-binary/",
         label_files=["fine_label_names.txt"],
-        label_keys=["label"],
+        label_keys=["coarse_label", "label"],
     )
 
   def _split_generators(self, dl_manager):
