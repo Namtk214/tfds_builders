@@ -67,17 +67,11 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
         name=self.name,
         # url="https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
         url="https://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz",
-        train_files=[
-            "data_batch_1.bin",
-            "data_batch_2.bin",
-            "data_batch_3.bin",
-            "data_batch_4.bin",
-            "data_batch_5.bin",
-        ],
-        test_files=["test_batch.bin"],
+        train_files= ["train.bin"],
+        test_files=["test.bin"],
         # prefix="cifar-10-batches-bin/",
-        prefix="cifar-100-batches-bin/",
-        label_files=["batches.meta.txt"],
+        prefix="cifar-100-binary/",
+        label_files=["fine_label_names.txt"],
         label_keys=["label"],
     )
 
@@ -166,22 +160,23 @@ class CifarInfo(
   """
 
 
-def _load_data(path, labels_number=1):
-  """Yields (labels, np_image) tuples."""
-  with tf.io.gfile.GFile(path, "rb") as f:
-    data = f.read()
-  offset = 0
-  max_offset = len(data) - 1
-  while offset < max_offset:
-    labels = np.frombuffer(
-        data, dtype=np.uint8, count=labels_number, offset=offset
-    ).reshape((labels_number,))
-    # 1 byte per label, 1024 * 3 = 3072 bytes for the image.
-    offset += labels_number
-    img = (
-        np.frombuffer(data, dtype=np.uint8, count=3072, offset=offset)
-        .reshape((3, _CIFAR_IMAGE_SIZE, _CIFAR_IMAGE_SIZE))
-        .transpose((1, 2, 0))
-    )
-    offset += 3072
-    yield labels, img
+def _load_data(path, labels_number=2):  # CIFAR-100 has 2 labels per image
+    """Yields (labels, np_image) tuples."""
+    with tf.io.gfile.GFile(path, "rb") as f:
+        data = f.read()
+    offset = 0
+    max_offset = len(data) - 1
+    while offset < max_offset:
+        labels = np.frombuffer(
+            data, dtype=np.uint8, count=labels_number, offset=offset
+        )
+        # First byte = coarse label, second byte = fine label
+        fine_label = labels[1:2]  # Use fine label only
+        offset += labels_number
+        img = (
+            np.frombuffer(data, dtype=np.uint8, count=3072, offset=offset)
+            .reshape((3, _CIFAR_IMAGE_SIZE, _CIFAR_IMAGE_SIZE))
+            .transpose((1, 2, 0))
+        )
+        offset += 3072
+        yield fine_label, img
