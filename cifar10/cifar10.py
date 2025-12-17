@@ -53,7 +53,8 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
         features=tfds.features.FeaturesDict({
             "id": tfds.features.Text(),
             "image": tfds.features.Image(shape=_CIFAR_IMAGE_SHAPE),
-            "label": tfds.features.ClassLabel(num_classes=10),
+            # "label": tfds.features.ClassLabel(num_classes=10),
+            "label": tfds.features.ClassLabel(num_classes=100),
         }),
         supervised_keys=("image", "label"),
         homepage="https://www.cs.toronto.edu/~kriz/cifar.html",
@@ -64,7 +65,8 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
   def _cifar_info(self):
     return CifarInfo(
         name=self.name,
-        url="https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
+        # url="https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
+        url="https://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz",
         train_files=[
             "data_batch_1.bin",
             "data_batch_2.bin",
@@ -73,7 +75,8 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
             "data_batch_5.bin",
         ],
         test_files=["test_batch.bin"],
-        prefix="cifar-10-batches-bin/",
+        # prefix="cifar-10-batches-bin/",
+        prefix="cifar-100-batches-bin/",
         label_files=["batches.meta.txt"],
         label_keys=["label"],
     )
