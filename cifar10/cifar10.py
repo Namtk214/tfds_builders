@@ -72,7 +72,7 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
         test_files=["test.bin"],
         # prefix="cifar-10-batches-bin/",
         prefix="cifar-100-binary/",
-        label_files=["fine_label_names.txt"],
+        label_files=["coarse_label_names.txt", "fine_label_names.txt"]
         label_keys=["coarse_label", "label"],
     )
 
