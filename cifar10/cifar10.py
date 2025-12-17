@@ -106,31 +106,20 @@ class Cifar10(tfds.core.GeneratorBasedBuilder):
         ),
     }
 
-  def _generate_examples(self, split_prefix, filepaths):
-    """Generate CIFAR examples as dicts.
-
-    Shared across CIFAR-{10, 100}. Uses self._cifar_info as
-    configuration.
-
-    Args:
-      split_prefix (str): Prefix that identifies the split (e.g. "tr" or "te").
-      filepaths (list[str]): The files to use to generate the data.
-
-    Yields:
-      The cifar examples, as defined in the dataset info features.
-    """
+def _generate_examples(self, split_prefix, filepaths):
     label_keys = self._cifar_info.label_keys
-    index = 0  # Using index as key since data is always loaded in same order.
+    index = 0
     for path in filepaths:
-      for labels, np_image in _load_data(path, len(label_keys)):
-        record = dict(zip(label_keys, labels))
-        # Note: "id" is only provided for the user convenience. To shuffle the
-        # dataset we use `index`, so that the sharding is compatible with
-        # earlier versions.
-        record["id"] = "{}{:05d}".format(split_prefix, index)
-        record["image"] = np_image
-        yield index, record
-        index += 1
+        for labels, np_image in _load_data(path, len(label_keys)):
+            # Explicitly build record with each label
+            record = {
+                "id": "{}{:05d}".format(split_prefix, index),
+                "image": np_image,
+            }
+            for i, label_key in enumerate(label_keys):
+                record[label_key] = int(labels[i])  # Convert to Python int
+            yield index, record
+            index += 1
 
 
 class CifarInfo(
